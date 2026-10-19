@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>部活動記録アプリ (clubapp)</title>
+    <!-- Tailwind CSS for modern responsive styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for sleek icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        /* Custom scrollbar for better visual quality */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Top Navigation Bar -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-indigo-600 text-white p-2.5 rounded-xl shadow-md shadow-indigo-200">
+                    <i class="fa-solid font-bold fa-futbol text-lg sm:text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
+                        部活動記録ノート
+                    </h1>
+                    <p class="text-xs text-slate-400 hidden sm:block">Club Activity Logger</p>
+                </div>
+            </div>
+
+            <!-- User Auth Controls -->
+            <div id="userInfoArea" class="hidden flex items-center space-x-3">
+                <div class="flex items-center space-x-2 bg-slate-100 py-1.5 px-3 rounded-full border border-slate-200">
+                    <img id="userAvatar" src="" alt="Avatar" class="w-7 h-7 rounded-full bg-slate-300 border border-white">
+                    <span id="userName" class="text-xs sm:text-sm font-semibold text-slate-700 max-w-[100px] sm:max-w-[150px] truncate">ユーザー</span>
+                </div>
+                <button id="logoutBtn" class="text-xs sm:text-sm bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium py-1.5 px-3 rounded-lg transition duration-200 flex items-center space-x-1">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span class="hidden sm:inline">ログアウト</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- Login View (Shown when logged out) -->
+        <div id="loginView" class="min-h-[75vh] flex items-center justify-center">
+            <div class="max-w-md w-full bg-white p-8 rounded-2xl shadow-xl border border-slate-100 text-center space-y-6 transform transition-all">
+                <div class="w-20 h-20 bg-indigo-50 text-indigo-600 rounded-3xl flex items-center justify-center mx-auto shadow-inner">
+                    <i class="fa-solid fa-clipboard-list text-3xl"></i>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-800">部活動記録アプリへようこそ</h2>
+                    <p class="text-slate-500 text-sm mt-2">日々の活動日誌、参加人数、気づきを簡単に記録・管理・グラフ分析できます。</p>
+                </div>
+                
+                <div class="border-t border-slate-100 pt-6">
+                    <button id="loginBtn" class="w-full bg-white hover:bg-slate-50 text-slate-700 font-medium py-3 px-4 border border-slate-300 rounded-xl shadow-sm flex items-center justify-center space-x-3 transition duration-200 hover:shadow-md">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                        </svg>
+                        <span>Googleアカウントでログイン</span>
+                    </button>
+                    <p class="text-xs text-slate-400 mt-4">※利用にはGoogleアカウントによる認証が必要です。</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="appView" class="hidden space-y-6">
+            
+            <!-- Toast / Status Message Area -->
+            <div id="toast" class="hidden fixed bottom-5 right-5 z-50 max-w-md bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl flex items-center space-x-3 transition-opacity">
+                <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+                <span id="toastMessage" class="text-sm font-medium">メッセージ</span>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Left Column: Registration & Edit Form -->
+                <div class="lg:col-span-5 xl:col-span-4">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6 sticky top-20">
+                        <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+                            <h2 id="formTitle" class="text-lg font-bold text-slate-800 flex items-center space-x-2">
+                                <i class="fa-solid fa-pen-to-square text-indigo-600"></i>
+                                <span>活動内容の記録</span>
+                            </h2>
+                            <button id="cancelEditBtn" class="hidden text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 py-1 px-2.5 rounded-md font-medium transition">
+                                キャンセル
+                            </button>
+                        </div>
+
+                        <form id="recordForm" class="space-y-4">
+                            <input type="hidden" id="editDocId" value="">
+
+                            <!-- 部活動名 -->
+                            <div>
+                                <label for="clubName" class="block text-xs font-semibold text-slate-600 mb-1">
+                                    部活動名 <span class="text-rose-500">*</span>
+                                </label>
+                                <div class="relative">
+                                    <input type="text" id="clubName" list="clubSuggestions" placeholder="例: サッカー部, 吹奏楽部" 
+                                           class="w-full text-sm bg-slate-50 border border-slate-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-100 rounded-xl py-2.5 px-3 transition outline-none" required>
+                                    <datalist id="clubSuggestions">
+                                        <option value="サッカー部"></option>
+                                        <option value="バスケットボール部"></option>
+                                        <option value="野球部"></option>
+                                        <option value="陸上競技部"></option>
+                                        <option value="吹奏楽部"></option>
+                                        <option value="美術部"></option>
+                                        <option value="パソコン部"></option>
+                                    </datalist>
+                                </div>
+                            </div>
+
+                            <!-- 活動日 & 参加人数 -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label for="activityDate" class="block text-xs font-semibold text-slate-600 mb-1">
+                                        活動日 <span class="text-rose-500">*</span>
+                                    </label>
+                                    <input type="date" id="activityDate" 
+                                           class="w-full text-sm bg-slate-50 border border-slate-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-100 rounded-xl py-2.5 px-3 transition outline-none" required>
+                                </div>
+                                <div>
+                                    <label for="memberCount" class="block text-xs font-semibold text-slate-600 mb-1">
+                                        参加人数 (人) <span class="text-rose-500">*</span>
+                                    </label>
+                                    <input type="number" id="memberCount" min="0" max="1000" placeholder="0" 
+                                           class="w-full text-sm bg-slate-50 border border-slate-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-100 rounded-xl py-2.5 px-3 transition outline-none" required>
+                                </div>
+                            </div>
+
+                            <!-- 活動内容 -->
+                            <div>
+                                <label for="activityContent" class="block text-xs font-semibold text-slate-600 mb-1">
+                                    活動内容 <span class="text-rose-500">*</span>
+                                </label>
+                                <textarea id="activityContent" rows="3" placeholder="本日の練習メニュー、実施内容など" 
+                                          class="w-full text-sm bg-slate-50 border border-slate-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-100 rounded-xl py-2 px-3 transition outline-none resize-none" required></textarea>
+                            </div>
+
+                            <!-- 反省・気づき -->
+                            <div>
+                                <label for="reflections" class="block text-xs font-semibold text-slate-600 mb-1">
+                                    反省・気づき <span class="text-rose-500">*</span>
+                                </label>
+                                <textarea id="reflections" rows="3" placeholder="良かった点、改善点、次回の目標など" 
+                                          class="w-full text-sm bg-slate-50 border border-slate-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-100 rounded-xl py-2 px-3 transition outline-none resize-none" required></textarea>
+                            </div>
+
+                            <!-- Error Alert inside form -->
+                            <div id="formError" class="hidden p-3 bg-rose-50 border border-rose-200 text-rose-600 text-xs rounded-xl flex items-center space-x-2">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                                <span id="formErrorMsg">すべての必須項目を入力してください。</span>
+                            </div>
+
+                            <button type="submit" id="submitBtn" 
+                                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-xl shadow-md shadow-indigo-100 transition duration-200 flex items-center justify-center space-x-2">
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                                <span id="submitBtnText">記録する</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Right Column: Data Visualization & History List -->
+                <div class="lg:col-span-7 xl:col-span-8 space-y-6">
+                    
+                    <!-- Chart Section (Advanced Feature) -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-sm font-bold text-slate-700 flex items-center space-x-2">
+                                <i class="fa-solid fa-chart-line text-indigo-500"></i>
+                                <span>参加人数推移</span>
+                            </h3>
+                            <span class="text-xs text-slate-400" id="chartSubtitle">直近の記録</span>
+                        </div>
+                        <div class="h-48 sm:h-56 relative">
+                            <canvas id="attendanceChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Filter & Sort Bar -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+                        <!-- Club Filter -->
+                        <div class="flex items-center space-x-2 flex-grow sm:max-w-xs">
+                            <i class="fa-solid fa-filter text-slate-400 text-sm pl-1"></i>
+                            <select id="filterClub" class="w-full text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-lg py-2 px-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-100">
+                                <option value="ALL">すべての部活動</option>
+                            </select>
+                        </div>
+
+                        <!-- Sorting -->
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-solid fa-arrow-down-short-wide text-slate-400 text-sm"></i>
+                            <select id="sortOrder" class="text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-lg py-2 px-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-100">
+                                <option value="desc">日付: 新しい順</option>
+                                <option value="asc">日付: 古い順</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Record Cards List -->
+                    <div id="recordsContainer" class="space-y-4">
+                        <!-- Dynamic content will be rendered here -->
+                        <div class="bg-white rounded-2xl p-8 text-center text-slate-400 border border-slate-200">
+                            <i class="fa-solid fa-circle-notch fa-spin text-2xl text-indigo-500 mb-2"></i>
+                            <p class="text-sm">データを読み込み中...</p>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Custom Modal for Delete Confirmation -->
+    <div id="deleteModal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-4 transform transition-all">
+            <div class="w-12 h-12 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto">
+                <i class="fa-solid fa-trash-can text-xl"></i>
+            </div>
+            <div class="text-center">
+                <h3 class="text-lg font-bold text-slate-800">記録の削除</h3>
+                <p class="text-xs text-slate-500 mt-1">この記録を削除してもよろしいですか？この操作は取り消せません。</p>
+            </div>
+            <div class="flex space-x-3 pt-2">
+                <button id="cancelDeleteBtn" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition">
+                    キャンセル
+                </button>
+                <button id="confirmDeleteBtn" class="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-xl transition shadow-md shadow-rose-100">
+                    削除する
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { 
+            getAuth, 
+            GoogleAuthProvider, 
+            signInWithPopup, 
+            signOut, 
+            onAuthStateChanged 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore, 
+            collection, 
+            addDoc, 
+            updateDoc, 
+            deleteDoc, 
+            doc, 
+            onSnapshot, 
+            serverTimestamp 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase Configuration (Specified Project: morimoto-e6e45)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBpEF6f1qFqpXJuq0sgKPVXCiNDyLpccuo",
+            authDomain: "morimoto-e6e45.firebaseapp.com",
+            projectId: "morimoto-e6e45",
+            storageBucket: "morimoto-e6e45.firebasestorage.app",
+            messagingSenderId: "541965522149",
+            appId: "1:541965522149:web:e4cf6e72ce96ac0173700c"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // State Management Variables
+        let currentUser = null;
+        let unsubscribeSnapshot = null;
+        let allRecords = [];
+        let chartInstance = null;
+        let recordToDeleteId = null;
+
+        // UI DOM Elements
+        const loginView = document.getElementById('loginView');
+        const appView = document.getElementById('appView');
+        const loginBtn = document.getElementById('loginBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const userInfoArea = document.getElementById('userInfoArea');
+        const userAvatar = document.getElementById('userAvatar');
+        const userName = document.getElementById('userName');
+
+        const recordForm = document.getElementById('recordForm');
+        const editDocIdInput = document.getElementById('editDocId');
+        const clubNameInput = document.getElementById('clubName');
+        const activityDateInput = document.getElementById('activityDate');
+        const memberCountInput = document.getElementById('memberCount');
+        const activityContentInput = document.getElementById('activityContent');
+        const reflectionsInput = document.getElementById('reflections');
+        const submitBtn = document.getElementById('submitBtn');
+        const submitBtnText = document.getElementById('submitBtnText');
+        const formTitle = document.getElementById('formTitle');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+        const formError = document.getElementById('formError');
+        const formErrorMsg = document.getElementById('formErrorMsg');
+
+        const filterClubSelect = document.getElementById('filterClub');
+        const sortOrderSelect = document.getElementById('sortOrder');
+        const recordsContainer = document.getElementById('recordsContainer');
+
+        const deleteModal = document.getElementById('deleteModal');
+        const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+
+        // Set Default Date to Today
+        activityDateInput.value = new Date().toISOString().split('T')[0];
+
+        // Toast Helper Function
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMessage');
+            const toastIcon = document.getElementById('toastIcon');
+
+            toastMsg.textContent = message;
+            if (isError) {
+                toastIcon.className = 'fa-solid fa-circle-exclamation text-rose-400 text-lg';
+            } else {
+                toastIcon.className = 'fa-solid fa-circle-check text-emerald-400 text-lg';
+            }
+
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Google Sign In Action
+        loginBtn.addEventListener('click', async () => {
+            const provider = new GoogleAuthProvider();
+            try {
+                await signInWithPopup(auth, provider);
+                showToast('ログインしました！');
+            } catch (error) {
+                console.error("Login failed:", error);
+                showToast('ログインに失敗しました: ' + error.message, true);
+            }
+        });
+
+        // Sign Out Action
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                if (unsubscribeSnapshot) unsubscribeSnapshot();
+                await signOut(auth);
+                showToast('ログアウトしました');
+            } catch (error) {
+                console.error("Logout failed:", error);
+            }
+        });
+
+        // Authentication State Listener
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (user) {
+                // User logged in
+                userName.textContent = user.displayName || 'ユーザー';
+                userAvatar.src = user.photoURL || 'https://placehold.co/100x100/6366f1/ffffff?text=User';
+                userInfoArea.classList.remove('hidden');
+                loginView.classList.add('hidden');
+                appView.classList.remove('hidden');
+
+                // Start Listening to Firestore
+                subscribeToRecords();
+            } else {
+                // User logged out
+                userInfoArea.classList.add('hidden');
+                loginView.classList.remove('hidden');
+                appView.classList.add('hidden');
+                allRecords = [];
+            }
+        });
+
+        // Firestore Realtime Listener
+        function subscribeToRecords() {
+            if (!currentUser) return;
+
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'clubapp';
+            
+            // Public collection path as per Rule 1
+            const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'club_records');
+
+            // Using simple collection query without complex orderBy in query (Rule 2: memory-based sorting/filtering)
+            unsubscribeSnapshot = onSnapshot(colRef, (snapshot) => {
+                allRecords = snapshot.docs.map(docSnap => ({
+                    id: docSnap.id,
+                    ...docSnap.data()
+                }));
+
+                updateClubFilterOptions();
+                renderRecords();
+                renderChart();
+            }, (error) => {
+                console.error("Firestore error:", error);
+                showToast("データの読み込みエラーが発生しました", true);
+            });
+        }
+
+        // Form Submit Event (Create or Update)
+        recordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            formError.classList.add('hidden');
+
+            const clubName = clubNameInput.value.trim();
+            const activityDate = activityDateInput.value;
+            const memberCount = parseInt(memberCountInput.value, 10);
+            const activityContent = activityContentInput.value.trim();
+            const reflections = reflectionsInput.value.trim();
+
+            // Form Validation
+            if (!clubName || !activityDate || isNaN(memberCount) || !activityContent || !reflections) {
+                formErrorMsg.textContent = "すべての必須項目を正しく入力してください。";
+                formError.classList.remove('hidden');
+                return;
+            }
+
+            if (memberCount < 0) {
+                formErrorMsg.textContent = "参加人数は0以上の数字を入力してください。";
+                formError.classList.remove('hidden');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-75');
+
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'clubapp';
+            const editId = editDocIdInput.value;
+
+            try {
+                if (editId) {
+                    // Update existing record
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'club_records', editId);
+                    await updateDoc(docRef, {
+                        clubName,
+                        activityDate,
+                        memberCount,
+                        activityContent,
+                        reflections,
+                        updatedAt: serverTimestamp()
+                    });
+                    showToast('記録を更新しました');
+                    resetForm();
+                } else {
+                    // Create new record
+                    const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'club_records');
+                    await addDoc(colRef, {
+                        clubName,
+                        activityDate,
+                        memberCount,
+                        activityContent,
+                        reflections,
+                        authorName: currentUser.displayName || '不明',
+                        authorUid: currentUser.uid,
+                        createdAt: serverTimestamp()
+                    });
+                    showToast('新しい記録を登録しました');
+                    resetForm();
+                }
+            } catch (err) {
+                console.error("Error saving record:", err);
+                showToast("保存中にエラーが発生しました", true);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-75');
+            }
+        });
+
+        // Reset Form to initial state
+        function resetForm() {
+            editDocIdInput.value = '';
+            clubNameInput.value = '';
+            activityDateInput.value = new Date().toISOString().split('T')[0];
+            memberCountInput.value = '';
+            activityContentInput.value = '';
+            reflectionsInput.value = '';
+            
+            formTitle.innerHTML = `<i class="fa-solid fa-pen-to-square text-indigo-600"></i><span>活動内容の記録</span>`;
+            submitBtnText.textContent = '記録する';
+            cancelEditBtn.classList.add('hidden');
+            formError.classList.add('hidden');
+        }
+
+        cancelEditBtn.addEventListener('click', resetForm);
+
+        // Populate Form for Editing
+        window.editRecord = function(id) {
+            const record = allRecords.find(r => r.id === id);
+            if (!record) return;
+
+            editDocIdInput.value = record.id;
+            clubNameInput.value = record.clubName || '';
+            activityDateInput.value = record.activityDate || '';
+            memberCountInput.value = record.memberCount || 0;
+            activityContentInput.value = record.activityContent || '';
+            reflectionsInput.value = record.reflections || '';
+
+            formTitle.innerHTML = `<i class="fa-solid fa-pen-to-square text-amber-500"></i><span>記録の編集</span>`;
+            submitBtnText.textContent = '更新する';
+            cancelEditBtn.classList.remove('hidden');
+            
+            // Scroll to form smoothly
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        // Modal triggers for Deletion
+        window.promptDeleteRecord = function(id) {
+            recordToDeleteId = id;
+            deleteModal.classList.remove('hidden');
+        };
+
+        cancelDeleteBtn.addEventListener('click', () => {
+            recordToDeleteId = null;
+            deleteModal.classList.add('hidden');
+        });
+
+        confirmDeleteBtn.addEventListener('click', async () => {
+            if (!recordToDeleteId) return;
+
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'clubapp';
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'club_records', recordToDeleteId);
+
+            try {
+                await deleteDoc(docRef);
+                showToast('記録を削除しました');
+            } catch (err) {
+                console.error("Error deleting:", err);
+                showToast('削除できませんでした', true);
+            } finally {
+                recordToDeleteId = null;
+                deleteModal.classList.add('hidden');
+            }
+        });
+
+        // Dynamic Filter Options for Club Names
+        function updateClubFilterOptions() {
+            const selectedVal = filterClubSelect.value;
+            const clubs = [...new Set(allRecords.map(r => r.clubName).filter(Boolean))].sort();
+
+            filterClubSelect.innerHTML = '<option value="ALL">すべての部活動</option>';
+            clubs.forEach(club => {
+                const opt = document.createElement('option');
+                opt.value = club;
+                opt.textContent = club;
+                filterClubSelect.appendChild(opt);
+            });
+
+            if (clubs.includes(selectedVal)) {
+                filterClubSelect.value = selectedVal;
+            }
+        }
+
+        // Event Listeners for Filters
+        filterClubSelect.addEventListener('change', () => { renderRecords(); renderChart(); });
+        sortOrderSelect.addEventListener('change', () => { renderRecords(); renderChart(); });
+
+        // Filter and Sort Data Helper
+        function getFilteredAndSortedRecords() {
+            const selectedClub = filterClubSelect.value;
+            const sortOrder = sortOrderSelect.value;
+
+            let filtered = allRecords.filter(item => {
+                if (selectedClub !== 'ALL' && item.clubName !== selectedClub) return false;
+                return true;
+            });
+
+            filtered.sort((a, b) => {
+                const dateA = new Date(a.activityDate || 0);
+                const dateB = new Date(b.activityDate || 0);
+                return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+            });
+
+            return filtered;
+        }
+
+        // Render Record Cards List
+        function renderRecords() {
+            const records = getFilteredAndSortedRecords();
+
+            if (records.length === 0) {
+                recordsContainer.innerHTML = `
+                    <div class="bg-white rounded-2xl p-10 text-center text-slate-400 border border-slate-200">
+                        <i class="fa-regular fa-folder-open text-4xl mb-3 text-slate-300"></i>
+                        <p class="text-slate-600 font-semibold text-sm">該当する記録が見つかりません</p>
+                        <p class="text-xs text-slate-400 mt-1">左側のフォームから新しい活動内容を記録してください。</p>
+                    </div>
+                `;
+                return;
+            }
+
+            recordsContainer.innerHTML = records.map(rec => {
+                const isAuthor = rec.authorUid === currentUser.uid;
+                const activityDateFormatted = rec.activityDate ? new Date(rec.activityDate).toLocaleDateString('ja-JP', { year: 'numeric', month: 'short', day: 'numeric', weekday: 'short' }) : '日付不明';
+
+                return `
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 hover:shadow-md transition space-y-3">
+                        <div class="flex items-start justify-between gap-2 border-b border-slate-100 pb-3">
+                            <div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="bg-indigo-50 text-indigo-700 text-xs font-bold px-2.5 py-1 rounded-lg border border-indigo-100">
+                                        ${escapeHtml(rec.clubName)}
+                                    </span>
+                                    <span class="text-xs text-slate-500 font-medium">
+                                        <i class="fa-regular fa-calendar-days text-slate-400 mr-1"></i>${activityDateFormatted}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center space-x-2">
+                                <span class="bg-slate-100 text-slate-600 text-xs px-2.5 py-1 rounded-full font-semibold">
+                                    <i class="fa-solid fa-users text-slate-400 mr-1"></i>${rec.memberCount} 人
+                                </span>
+                                <button onclick="editRecord('${rec.id}')" title="編集" class="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-50 rounded-lg transition">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </button>
+                                <button onclick="promptDeleteRecord('${rec.id}')" title="削除" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-slate-50 rounded-lg transition">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Activity Content -->
+                        <div class="space-y-1">
+                            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">活動内容</span>
+                            <p class="text-xs sm:text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">${escapeHtml(rec.activityContent)}</p>
+                        </div>
+
+                        <!-- Reflections -->
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 space-y-1">
+                            <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-500 flex items-center space-x-1">
+                                <i class="fa-regular fa-lightbulb"></i>
+                                <span>反省・気づき</span>
+                            </span>
+                            <p class="text-xs sm:text-sm text-slate-600 whitespace-pre-wrap leading-relaxed">${escapeHtml(rec.reflections)}</p>
+                        </div>
+
+                        <!-- Footer Info -->
+                        <div class="pt-1 flex items-center justify-between text-[11px] text-slate-400">
+                            <span>記録者: ${escapeHtml(rec.authorName || '不明')}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Helper function for security (prevent XSS)
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // Render Member Count Chart using Chart.js
+        function renderChart() {
+            const ctx = document.getElementById('attendanceChart').getContext('2d');
+            const records = getFilteredAndSortedRecords();
+
+            // Sort chronologically (oldest to newest) for line graph trend
+            const chronological = [...records].sort((a, b) => new Date(a.activityDate) - new Date(b.activityDate));
+
+            const labels = chronological.map(r => r.activityDate ? r.activityDate.substring(5) : '');
+            const dataValues = chronological.map(r => r.memberCount || 0);
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '参加人数 (人)',
+                        data: dataValues,
+                        borderColor: '#4f46e5',
+                        backgroundColor: 'rgba(79, 70, 229, 0.08)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.3,
+                        pointBackgroundColor: '#6366f1',
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => ` 参加人数: ${context.parsed.y} 人`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { size: 10 } }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: { precision: 0, font: { size: 10 } },
+                            grid: { color: '#f1f5f9' }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
